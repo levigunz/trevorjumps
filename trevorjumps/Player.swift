@@ -8,18 +8,24 @@
 
 import SpriteKit
 
-public class Player : SKSpriteNode {
-    func jump() {
-        print("Jumped!")
-        //        self.texture = SKTexture(imageNamed: "player_jumping")
-        self.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 500))
-    }
+class Player : SKSpriteNode {
     
-    func shoot() {
-        print("GEE!")
+    func jump() {
+        //        self.texture = SKTexture(imageNamed: "player_jumping")
+        if self.physicsBody?.velocity.dy == 0 {
+            self.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 500))
+        }
     }
     
     func duck() {
         print("Nice try")
+        self.physicsBody?.applyImpulse(CGVector(dx: 0, dy: -750))
+    }
+    
+    func shoot() {
+        print("GEE!")
+        let newGee = Gee()
+        addChild(newGee)
+        newGee.shoot()
     }
 }

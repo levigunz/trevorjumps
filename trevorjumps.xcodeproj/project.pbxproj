@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1819208421A5A1A800A50DE2 /* Gee.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1819208321A5A1A800A50DE2 /* Gee.swift */; };
+		18E3C98A21A37CC900D12406 /* Homework.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E3C98921A37CC900D12406 /* Homework.swift */; };
 		18F00D4E21A2562E00EDC0EF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F00D4D21A2562E00EDC0EF /* AppDelegate.swift */; };
 		18F00D5021A2562E00EDC0EF /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 18F00D4F21A2562E00EDC0EF /* GameScene.sks */; };
 		18F00D5221A2562E00EDC0EF /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 18F00D5121A2562E00EDC0EF /* Actions.sks */; };
@@ -21,6 +23,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1819208321A5A1A800A50DE2 /* Gee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gee.swift; sourceTree = "<group>"; };
+		18E3C98921A37CC900D12406 /* Homework.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Homework.swift; sourceTree = "<group>"; };
 		18F00D4A21A2562E00EDC0EF /* trevorjumps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = trevorjumps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18F00D4D21A2562E00EDC0EF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		18F00D4F21A2562E00EDC0EF /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -72,6 +76,8 @@
 				18F00D6721A256B800EDC0EF /* MainMenu.sks */,
 				18F00D6521A2565200EDC0EF /* MainMenu.swift */,
 				18F00D6921A257AF00EDC0EF /* Player.swift */,
+				18E3C98921A37CC900D12406 /* Homework.swift */,
+				1819208321A5A1A800A50DE2 /* Gee.swift */,
 				18F00D5121A2562E00EDC0EF /* Actions.sks */,
 				18F00D5521A2562E00EDC0EF /* GameViewController.swift */,
 				18F00D5721A2562E00EDC0EF /* Main.storyboard */,
@@ -161,6 +167,8 @@
 				18F00D4E21A2562E00EDC0EF /* AppDelegate.swift in Sources */,
 				18F00D6A21A257AF00EDC0EF /* Player.swift in Sources */,
 				18F00D6621A2565200EDC0EF /* MainMenu.swift in Sources */,
+				1819208421A5A1A800A50DE2 /* Gee.swift in Sources */,
+				18E3C98A21A37CC900D12406 /* Homework.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
