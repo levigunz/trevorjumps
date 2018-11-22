@@ -19,6 +19,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var trevor : Player!
     var gameTimer: Timer!
+    var highScore: Int! = 0
+    var highScoreLabel: SKLabelNode!
+    var score: Int! = 0
+    var scoreLabel: SKLabelNode!
+    var ammo: Int! = 5
+    var ammoLabel: SKLabelNode!
+    var health: Int! = 3 {
+    didSet {
+        healthLabel.text = "Health:\n\(String(health))"
+    }
+    }
+    var healthLabel: SKLabelNode!
     
     override func didMove(to view: SKView) {
         print("Loaded the class")
@@ -32,6 +44,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let test = Homework()
         addChild(test)
         test.startMove()
+        
+        scoreLabel = SKLabelNode(text: "Score: \n" + String(score))
+        scoreLabel.position.x = -50
+        scoreLabel.position.y = 150
+        addChild(scoreLabel)
+        
+        highScoreLabel = SKLabelNode(text: "High Score: \n" + String(highScore))
+        highScoreLabel.position.x = -250
+        highScoreLabel.position.y = 150
+        addChild(highScoreLabel)
+        
+        ammoLabel = SKLabelNode(text: "Ammo: \n" + String(ammo))
+        ammoLabel.position.x = 150
+        ammoLabel.position.y = 150
+        addChild(ammoLabel)
+        
+        healthLabel = SKLabelNode(text: "Health: \n" + String(health))
+        healthLabel.position.x = 350
+        healthLabel.position.y = 150
+        addChild(healthLabel)
         
         self.trevor = trevor
         
@@ -62,9 +94,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if(contact.bodyA.categoryBitMask == Physics.Player && contact.bodyB.categoryBitMask == Physics.Homework) {
             self.endGame(a: contact.bodyA, b: contact.bodyB)
+            health -= 1
         }
         
         if(contact.bodyA.categoryBitMask == Physics.Homework && contact.bodyB.categoryBitMask == Physics.Player) {
+            health -= 1
             print("You dead")
         }
     }
