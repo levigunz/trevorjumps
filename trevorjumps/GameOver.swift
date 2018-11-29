@@ -1,20 +1,17 @@
 //
-//  MainMenu.swift
+//  GameOver.swift
 //  trevorjumps
 //
-//  Created by Levi Gunsallus on 11/18/18.
+//  Created by Levi Gunsallus on 11/22/18.
 //  Copyright © 2018 levigunz. All rights reserved.
 //
 
 import SpriteKit
-import GameplayKit
 
-class MainMenu: SKScene {
-    
-    var playButton : SKLabelNode?
+class GameOver : SKScene {
     
     override func didMove(to view: SKView) {
-        print("Loaded MainMenu")
+        print("GameOver loaded")
     }
     
     override internal func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -23,12 +20,11 @@ class MainMenu: SKScene {
         let touchedNode = self.atPoint(positionInScene)
         
         if let name = touchedNode.name {
-            if name == "playButton" {
-                print("play touched")
+            if name == "playAgain" {
                 let newScene = SKScene(fileNamed: "GameScene")
-                self.view?.presentScene(newScene!)
+                self.view?.presentScene(newScene)
             }
         }
     }
+    
 }
-

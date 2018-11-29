@@ -13,17 +13,29 @@ struct Physics {
     static let Player: UInt32 = 1
     static let Gee: UInt32 = 2
     static let Homework: UInt32 = 4
+    static let Ammo: UInt32 = 8
+    static let Health: UInt32 = 16
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var trevor : Player!
-    var gameTimer: Timer!
+    var homeworkTimer: Timer!
+    var ammoTimer: Timer!
+    var healthTimer: Timer!
     var highScore: Int! = 0
     var highScoreLabel: SKLabelNode!
-    var score: Int! = 0
+    var score: Int! = 0 {
+        didSet {
+            scoreLabel.text = "Score: \n" + String(score)
+        }
+    }
     var scoreLabel: SKLabelNode!
-    var ammo: Int! = 5
+    var ammo: Int! = 5 {
+        didSet {
+            ammoLabel.text = "Ammo: \n" + String(ammo)
+        }
+    }
     var ammoLabel: SKLabelNode!
     var health: Int! = 3 {
     didSet {
@@ -36,10 +48,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         print("Loaded the class")
         
         self.physicsWorld.contactDelegate = self
-        
-        guard let trevor = self.childNode(withName: "trevor") as? Player else {
-            fatalError("Player not loaded")
-        }
         
         let test = Homework()
         addChild(test)
@@ -61,14 +69,51 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(ammoLabel)
         
         healthLabel = SKLabelNode(text: "Health: \n" + String(health))
-        healthLabel.position.x = 350
+        healthLabel.position.x = 300
         healthLabel.position.y = 150
         addChild(healthLabel)
         
-        self.trevor = trevor
-        
-        gameTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) {_ in
+        homeworkTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) {_ in
             self.addHomework()
+        }
+        
+        ammoTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true, block: {_ in
+            self.addAmmo()
+        })
+        
+        healthTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true, block: {_ in
+            self.addHealth()
+        })
+        
+        self.trevor = Player(x: 175 - ((view.scene?.size.width)! / 2))
+        addChild(self.trevor)
+        
+        addSwipeGestures()
+    }
+    
+    func addSwipeGestures() {
+        let swipeUpRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipeUp))
+        swipeUpRecognizer.direction = .up
+        self.view!.addGestureRecognizer(swipeUpRecognizer)
+        
+        let swipeDownRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipeDown))
+        swipeDownRecognizer.direction = .down
+        self.view!.addGestureRecognizer(swipeDownRecognizer)
+    }
+    
+    @objc
+    func handleSwipeDown(gesture: UISwipeGestureRecognizer) {
+        let touch = gesture.location(in: view).x
+        if(touch < ((view!.scene?.size.width)! / 2)) {
+            trevor.duck()
+        }
+    }
+    
+    @objc
+    func handleSwipeUp(gesture: UISwipeGestureRecognizer) {
+        let touch = gesture.location(in: view).x
+        if(touch < ((view!.scene?.size.width)! / 2)) {
+            trevor.jump()
         }
     }
     
@@ -77,12 +122,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for t in touches {
             let touch = t.location(in: self)
             if touch.x >= 0 {
-                trevor?.shoot()
-            } else {
-                if touch.y >= 0 {
-                    trevor?.jump()
+                if (self.ammo > 0) {
+                    self.ammo -= 1
+                    trevor.shoot()
                 } else {
-                    trevor?.duck()
+                    print("Out of ammo :(")
                 }
             }
         }
@@ -90,36 +134,76 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func didBegin(_ contact: SKPhysicsContact) {
         
-//        print("Contact: ", contact.bodyA.categoryBitMask, ", ", contact.bodyB.categoryBitMask)
+        //TODO: Sort the two bodies before actually doing the comparisons to make destruction and comparison easier
         
-        if(contact.bodyA.categoryBitMask == Physics.Player && contact.bodyB.categoryBitMask == Physics.Homework) {
-            self.endGame(a: contact.bodyA, b: contact.bodyB)
-            health -= 1
+        var lowerBody : SKPhysicsBody
+        var higherBody : SKPhysicsBody
+        
+        if (contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask) {
+            lowerBody = contact.bodyA
+            higherBody = contact.bodyB
+        } else {
+            lowerBody = contact.bodyB
+            higherBody = contact.bodyA
         }
         
-        if(contact.bodyA.categoryBitMask == Physics.Homework && contact.bodyB.categoryBitMask == Physics.Player) {
+        //Player & Homework
+        if(lowerBody.categoryBitMask == Physics.Player && higherBody.categoryBitMask == Physics.Homework) {
             health -= 1
-            print("You dead")
+            health == 0 ? self.endGame() : contact.bodyB.node?.run(SKAction.removeFromParent())
         }
+        
+        //Gee & Homework
+        if(lowerBody.categoryBitMask == Physics.Gee && higherBody.categoryBitMask == Physics.Homework) {
+            score += 100
+            contact.bodyA.node?.run(SKAction.removeFromParent())
+            contact.bodyB.node?.run(SKAction.removeFromParent())
+        }
+        
+        //Player & AmmoUp
+        if(lowerBody.categoryBitMask == Physics.Player && higherBody.categoryBitMask == Physics.Ammo) {
+            
+            //TODO: Destroy ammo animation
+            higherBody.node?.run(SKAction.removeFromParent())
+            
+            ammo += 5
+        }
+        
+        //Player & HealthUp
+        if(lowerBody.categoryBitMask == Physics.Player && higherBody.categoryBitMask == Physics.Health) {
+            
+            //TODO: Destroy health animation
+            higherBody.node?.run(SKAction.removeFromParent())
+            
+            if (health < 3) {
+                health += 1
+            }
+            
+        }
+        
     }
     
     func addHomework() {
-        let hw = Homework()
-        addChild(hw)
-        hw.startMove()
+        let newHw = Homework()
+        addChild(newHw)
+        newHw.startMove()
     }
     
-    func endGame(a: SKPhysicsBody, b: SKPhysicsBody) {
-        a.node?.run(
-                SKAction.removeFromParent()
-        )
-        
-        b.node?.run(
-            SKAction.removeFromParent()
-        )
+    func addHealth() {
+        let newHealth = LifePowerUp()
+        addChild(newHealth)
+        newHealth.startMove()
     }
     
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+    func addAmmo() {
+        let newAmmo = AmmoPowerUp()
+        addChild(newAmmo)
+        newAmmo.startMove()
+    }
+    
+    func endGame() {
+        self.removeAllChildren()
+        let newScene = SKScene(fileNamed: "GameOver")
+        self.view?.presentScene(newScene)
     }
 }

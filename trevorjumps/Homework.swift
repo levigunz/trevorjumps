@@ -23,10 +23,10 @@ class Homework : SKSpriteNode {
         self.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: self.size.width, height: self.size.height))
         self.physicsBody?.affectedByGravity = false
         self.physicsBody?.isDynamic = true
-        self.physicsBody?.mass = 10
+        self.physicsBody?.mass = 0.5
         self.physicsBody?.collisionBitMask = Physics.Gee | Physics.Player
         self.physicsBody?.categoryBitMask = Physics.Homework
-        self.physicsBody?.contactTestBitMask = Physics.Player
+        self.physicsBody?.contactTestBitMask = Physics.Player | Physics.Gee
         self.run(
             SKAction.sequence([
                 SKAction.wait(forDuration: 3),
@@ -40,6 +40,6 @@ class Homework : SKSpriteNode {
     }
     
     func startMove() {
-         self.physicsBody?.applyImpulse(CGVector(dx: -5000, dy: 0))
+         self.physicsBody?.applyImpulse(CGVector(dx: -500, dy: 0))
     }
 }
