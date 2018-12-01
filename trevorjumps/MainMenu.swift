@@ -14,7 +14,6 @@ class MainMenu: SKScene {
     var playButton : SKLabelNode?
     
     override func didMove(to view: SKView) {
-        print("Loaded MainMenu")
     }
     
     override internal func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -24,7 +23,6 @@ class MainMenu: SKScene {
         
         if let name = touchedNode.name {
             if name == "playButton" {
-                print("play touched")
                 let newScene = SKScene(fileNamed: "GameScene")
                 self.view?.presentScene(newScene!)
             }

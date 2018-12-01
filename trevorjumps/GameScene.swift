@@ -8,6 +8,7 @@
 
 import SpriteKit
 import GameplayKit
+import Foundation
 
 struct Physics {
     static let Player: UInt32 = 1
@@ -15,7 +16,11 @@ struct Physics {
     static let Homework: UInt32 = 4
     static let Ammo: UInt32 = 8
     static let Health: UInt32 = 16
+    static let Bounds: UInt32 = 32
 }
+
+let screenHeight : Float = Float(UIScreen.main.bounds.height)
+let screenWidth : Float = Float(UIScreen.main.bounds.width)
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
@@ -23,15 +28,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var homeworkTimer: Timer!
     var ammoTimer: Timer!
     var healthTimer: Timer!
-    var highScore: Int! = 0
     var highScoreLabel: SKLabelNode!
+    
     var score: Int! = 0 {
         didSet {
             scoreLabel.text = "Score: \n" + String(score)
         }
     }
     var scoreLabel: SKLabelNode!
-    var ammo: Int! = 5 {
+    var ammo: Int! = 50 {
         didSet {
             ammoLabel.text = "Ammo: \n" + String(ammo)
         }
@@ -45,20 +50,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var healthLabel: SKLabelNode!
     
     override func didMove(to view: SKView) {
-        print("Loaded the class")
-        
         self.physicsWorld.contactDelegate = self
-        
-        let test = Homework()
-        addChild(test)
-        test.startMove()
         
         scoreLabel = SKLabelNode(text: "Score: \n" + String(score))
         scoreLabel.position.x = -50
         scoreLabel.position.y = 150
         addChild(scoreLabel)
         
-        highScoreLabel = SKLabelNode(text: "High Score: \n" + String(highScore))
+        highScoreLabel = SKLabelNode(text: "High Score: \n" + (UserDefaults.standard.string(forKey: "HIGHSCORE") ?? "0"))
         highScoreLabel.position.x = -250
         highScoreLabel.position.y = 150
         addChild(highScoreLabel)
@@ -88,7 +87,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.trevor = Player(x: 175 - ((view.scene?.size.width)! / 2))
         addChild(self.trevor)
         
+        addBounds()
         addSwipeGestures()
+    }
+    
+    func addBounds() {
+        let leftBound : SKSpriteNode = SKSpriteNode(color: SKColor.clear, size: CGSize(width: 1, height: Int(screenHeight)))
+        leftBound.position.x = CGFloat(-screenWidth)
+        leftBound.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: leftBound.size.width, height: leftBound.size.height))
+        leftBound.physicsBody?.affectedByGravity = false
+        leftBound.physicsBody?.isDynamic = false
+        leftBound.physicsBody?.allowsRotation = false
+        leftBound.physicsBody?.mass = 2.5
+        leftBound.physicsBody?.categoryBitMask = Physics.Bounds
+        leftBound.physicsBody?.contactTestBitMask = Physics.Homework | Physics.Ammo | Physics.Health
+        self.addChild(leftBound)
+        
+        //Get rid of this * 2; it is just because Trevor can jump off screen right now
+        let rightBound : SKSpriteNode = SKSpriteNode(color: SKColor.clear, size: CGSize(width: 1, height: Int(screenHeight * 2)))
+        rightBound.position.x = CGFloat(screenWidth)
+        rightBound.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: rightBound.size.width, height: rightBound.size.height))
+        rightBound.physicsBody?.affectedByGravity = false
+        rightBound.physicsBody?.isDynamic = false
+        rightBound.physicsBody?.allowsRotation = false
+        rightBound.physicsBody?.mass = 2.5
+        rightBound.physicsBody?.categoryBitMask = Physics.Bounds
+        rightBound.physicsBody?.contactTestBitMask = Physics.Gee
+        self.addChild(rightBound)
     }
     
     func addSwipeGestures() {
@@ -133,9 +158,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
-        
-        //TODO: Sort the two bodies before actually doing the comparisons to make destruction and comparison easier
-        
+        //Sorting the bodies
         var lowerBody : SKPhysicsBody
         var higherBody : SKPhysicsBody
         
@@ -150,43 +173,51 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //Player & Homework
         if(lowerBody.categoryBitMask == Physics.Player && higherBody.categoryBitMask == Physics.Homework) {
             health -= 1
-            health == 0 ? self.endGame() : contact.bodyB.node?.run(SKAction.removeFromParent())
+            health == 0 ? self.endGame() : higherBody.node?.run(SKAction.removeFromParent())
         }
         
         //Gee & Homework
         if(lowerBody.categoryBitMask == Physics.Gee && higherBody.categoryBitMask == Physics.Homework) {
             score += 100
-            contact.bodyA.node?.run(SKAction.removeFromParent())
-            contact.bodyB.node?.run(SKAction.removeFromParent())
+            let hs = UserDefaults.standard.integer(forKey: "HIGHSCORE")
+            if (score > hs) {
+                highScoreLabel.text = "High Score: \n" + String(score)
+                //TODO: Noticable frame drop on first new score:/
+            }
+            lowerBody.node?.run(SKAction.removeFromParent())
+            higherBody.node?.run(SKAction.removeFromParent())
         }
         
         //Player & AmmoUp
         if(lowerBody.categoryBitMask == Physics.Player && higherBody.categoryBitMask == Physics.Ammo) {
-            
-            //TODO: Destroy ammo animation
             higherBody.node?.run(SKAction.removeFromParent())
-            
             ammo += 5
         }
         
         //Player & HealthUp
         if(lowerBody.categoryBitMask == Physics.Player && higherBody.categoryBitMask == Physics.Health) {
-            
-            //TODO: Destroy health animation
             higherBody.node?.run(SKAction.removeFromParent())
-            
             if (health < 3) {
                 health += 1
             }
-            
+        }
+        
+        //Bounds & Gee
+        if(higherBody.categoryBitMask == Physics.Bounds && lowerBody.categoryBitMask == Physics.Gee) {
+            lowerBody.node?.run(SKAction.removeFromParent())
+        }
+        
+        //Bounds & Homework | Ammo | Health
+        if(higherBody.categoryBitMask == Physics.Bounds && (lowerBody.categoryBitMask == Physics.Ammo || lowerBody.categoryBitMask == Physics.Health || lowerBody.categoryBitMask == Physics.Homework)) {
+            lowerBody.node?.run(SKAction.removeFromParent())
         }
         
     }
     
     func addHomework() {
-        let newHw = Homework()
-        addChild(newHw)
-        newHw.startMove()
+        let newHW = Homework()
+        addChild(newHW)
+        newHW.startMove()
     }
     
     func addHealth() {
@@ -203,7 +234,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func endGame() {
         self.removeAllChildren()
+        if(score! > UserDefaults.standard.integer(forKey: "HIGHSCORE")) {
+            UserDefaults.standard.set(score!, forKey: "HIGHSCORE")
+        }
         let newScene = SKScene(fileNamed: "GameOver")
+        newScene?.userData = NSMutableDictionary()
+        newScene?.userData?.setObject(String(score), forKey: "score" as NSCopying)
         self.view?.presentScene(newScene)
     }
+    
+    // TODO: See if using this override function is less costly than using the left and right bound physics
+    
+//    override func update(_ currentTime: TimeInterval) {
+//        for node in children {
+//            if ["homework", "gee", "ammoCoin", "heart"].contains(node.name) && !intersects(node) {
+//                print("offscreen")
+//                node.removeFromParent()
+//            }
+//        }
+//    }
 }

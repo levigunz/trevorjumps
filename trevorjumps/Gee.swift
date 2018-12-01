@@ -21,13 +21,7 @@ class Gee : SKSpriteNode {
         self.physicsBody?.mass = 10
         self.physicsBody?.collisionBitMask = Physics.Homework
         self.physicsBody?.categoryBitMask = Physics.Gee
-        self.physicsBody?.contactTestBitMask = Physics.Homework
-        self.run(
-            SKAction.sequence([
-                SKAction.wait(forDuration: 1.5),
-                SKAction.removeFromParent()
-                ])
-        )
+        self.physicsBody?.contactTestBitMask = Physics.Homework | Physics.Bounds
     }
     
     required init?(coder aDecoder: NSCoder) {

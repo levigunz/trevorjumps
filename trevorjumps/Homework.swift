@@ -8,7 +8,7 @@
 
 import SpriteKit
 
-let screenHeight : Float = Float(UIScreen.main.bounds.height / 2) - 100
+let spawnHeight : Float = Float(UIScreen.main.bounds.height / 2) - 100
 
 class Homework : SKSpriteNode {
     
@@ -16,7 +16,7 @@ class Homework : SKSpriteNode {
         let texture = SKTexture(imageNamed: "homework")
         super.init(texture: texture, color: SKColor.clear, size: texture.size())
         self.position.x = UIScreen.main.bounds.width / 2 + self.size.width
-        let y = Float.random(in: 0...screenHeight)
+        let y = Float.random(in: 0...spawnHeight)
         self.position.y = Bool.random() ? CGFloat(y) : CGFloat(-y)
         self.name = "homework"
         self.setScale(0.5)
@@ -24,15 +24,9 @@ class Homework : SKSpriteNode {
         self.physicsBody?.affectedByGravity = false
         self.physicsBody?.isDynamic = true
         self.physicsBody?.mass = 0.5
-        self.physicsBody?.collisionBitMask = Physics.Gee | Physics.Player
+        self.physicsBody?.collisionBitMask = Physics.Gee
         self.physicsBody?.categoryBitMask = Physics.Homework
-        self.physicsBody?.contactTestBitMask = Physics.Player | Physics.Gee
-        self.run(
-            SKAction.sequence([
-                SKAction.wait(forDuration: 3),
-                SKAction.removeFromParent()
-                ])
-        )
+        self.physicsBody?.contactTestBitMask = Physics.Player | Physics.Gee | Physics.Bounds
     }
     
     required init?(coder aDecoder: NSCoder) {

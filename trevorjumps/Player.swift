@@ -23,7 +23,7 @@ class Player : SKSpriteNode {
         self.physicsBody?.allowsRotation = false
         self.physicsBody?.mass = 2.5
         self.physicsBody?.restitution = 0
-        self.physicsBody?.collisionBitMask = Physics.Homework | Physics.Ammo | Physics.Health
+        self.physicsBody?.collisionBitMask = Physics.Bounds
         self.physicsBody?.categoryBitMask = Physics.Player
         self.physicsBody?.contactTestBitMask = Physics.Homework | Physics.Ammo | Physics.Health
     }
@@ -40,12 +40,10 @@ class Player : SKSpriteNode {
     }
     
     func duck() {
-        print("Nice try")
         self.physicsBody?.applyImpulse(CGVector(dx: 0, dy: -5000))
     }
     
     func shoot() {
-        print("GEE!")
         let newGee = Gee()
         addChild(newGee)
         newGee.shoot()

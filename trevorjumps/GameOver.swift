@@ -11,7 +11,11 @@ import SpriteKit
 class GameOver : SKScene {
     
     override func didMove(to view: SKView) {
-        print("GameOver loaded")
+        let scoreLabel : SKLabelNode = SKLabelNode(text: self.userData?.value(forKey: "score") as? String)
+        self.addChild(scoreLabel)
+        
+        let highScoreLabel : SKLabelNode = SKLabelNode(text: UserDefaults.standard.string(forKey: "HIGHSCORE"))
+        self.addChild(highScoreLabel)
     }
     
     override internal func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
